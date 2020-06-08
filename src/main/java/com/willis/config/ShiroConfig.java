@@ -1,6 +1,7 @@
 package com.willis.config;
 
-import org.springframework.context.annotation.Configuration;
+import com.willis.shiro.AccountRealm;
+import com.willis.shiro.JwtFilter;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.session.mgt.SessionManager;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
@@ -12,6 +13,7 @@ import org.crazycake.shiro.RedisCacheManager;
 import org.crazycake.shiro.RedisSessionDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import javax.servlet.Filter;
 import java.util.HashMap;
@@ -21,8 +23,11 @@ import java.util.Map;
 
 @Configuration
 public class ShiroConfig {
+
+
+
     @Autowired
-    JwtFilter jwtFilter;
+    private JwtFilter jwtFilter;
 
     @Bean
     public SessionManager sessionManager(RedisSessionDAO redisSessionDAO) {
@@ -37,12 +42,9 @@ public class ShiroConfig {
     public DefaultWebSecurityManager securityManager(AccountRealm accountRealm,
                                                      SessionManager sessionManager,
                                                      RedisCacheManager redisCacheManager) {
-
         DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager(accountRealm);
-
         //inject sessionManager
         securityManager.setSessionManager(sessionManager);
-
         // inject redisCacheManager
         securityManager.setCacheManager(redisCacheManager);
         return securityManager;
@@ -54,7 +56,7 @@ public class ShiroConfig {
 
         Map<String, String> filterMap = new LinkedHashMap<>();
 
-        filterMap.put("/**", "jwt");
+        filterMap.put("/**", "authc");
         chainDefinition.addPathDefinitions(filterMap);
         return chainDefinition;
     }
@@ -74,4 +76,6 @@ public class ShiroConfig {
         shiroFilter.setFilterChainDefinitionMap(filterMap);
         return shiroFilter;
     }
+
+
 }
